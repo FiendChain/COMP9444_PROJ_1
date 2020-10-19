@@ -1,0 +1,13 @@
+.vscode/
+encoder_*.png
+kuzu_*.png
+spiral_*.png
+spiral_*/
+encoder_images/
+data/
+
+__pycache__/
+*.pyc
+
+spiral_*.pt
+encoder_*.pt
