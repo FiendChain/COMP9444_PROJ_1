@@ -36,7 +36,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.item()))
 
-def test(args, model, device, test_loader):
+def test(args, model, device, test_loader, name="Test"):
     model.eval()
     test_loss = 0
     correct = 0
@@ -61,7 +61,8 @@ def test(args, model, device, test_loader):
 
     test_loss /= len(test_loader.dataset)
 
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+    print('{} set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+        name,
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
 
@@ -109,6 +110,8 @@ def main():
     # fetch and load training data
     trainset = datasets.KMNIST(root='./data', train=True, download=True, transform=transform)
     train_loader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True)
+    
+    test_train_loader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=False)
 
     # fetch and load test data
     testset = datasets.KMNIST(root='./data', train=False, download=True, transform=transform)
@@ -153,10 +156,10 @@ def main():
     net_fname = f"kmnist_{model_prefix}.pt"
     log_fname = f"kmnist_{model_prefix}.log"
 
-    if args.override:
-        opt = input(f"overriding {net_fname} and {log_fname}. Are you sure? (y/n)")
-        if opt.lower() != 'y':
-            return 1
+    # if args.override:
+    #     opt = input(f"overriding {net_fname} and {log_fname}. Are you sure? (y/n)")
+    #     if opt.lower() != 'y':
+    #         return 1
 
     logs = []
 
@@ -196,8 +199,8 @@ def main():
         optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=args.mom)
         for epoch in range(last_epoch, args.epochs + last_epoch):
             train(args, net, device, train_loader, optimizer, epoch)
-            train_log = test(args, net, device, train_loader)
-            test_log = test(args, net, device, test_loader)
+            train_log = test(args, net, device, test_train_loader, "Train")
+            test_log = test(args, net, device, test_loader, "Test")
             logs.append((train_log, test_log))
 
     except KeyboardInterrupt:
